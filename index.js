@@ -1,7 +1,8 @@
+const WebSocket = require('ws');
+
 const Nuance = require('./nuance');
 const TwitterProvider = require('./twitter');
 const RedditProvider = require('./reddit');
-
 
 const nuance = new Nuance({
 	nmaid: 'Nuance_ConUHack2017_20170119_210049',
@@ -13,21 +14,46 @@ const nuance = new Nuance({
 	clientAppVersion: '0.0',
 });
 
-/*nuance.getNLU('I love donald trump')
- .then((resp) => {
- console.log(resp);
- })
- .catch((err) => {
- console.log(err);
- });*/
+const TWITTER_PROVIDER = 'twitter';
+const REDDIT_PROVIDER = 'reddit';
+const PROVIDERS = [
+	TWITTER_PROVIDER,
+	REDDIT_PROVIDER,
+];
 
-TwitterProvider.provide('9fwnAGzG8KUYrSjZStsvNnLTS', 'KkvpF6btanqadmskdLJBxtTdPMWRyB0c2LFmSJLWSHBl1zK2Tn')
-	.then((twitterClient) => {
+const CMD_SEARCH = 'search';
 
+Promise.all([
+	TwitterProvider.provide('9fwnAGzG8KUYrSjZStsvNnLTS', 'KkvpF6btanqadmskdLJBxtTdPMWRyB0c2LFmSJLWSHBl1zK2Tn'),
+	RedditProvider.provide('k06yRu5qViNBmelHGLTgHruPczw')
+]).then((providers) => providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {}))
+	.then((providers) => {
+		const wss = new WebSocket.Server({port: 8080});
+
+		wss.on('connection', (ws) => {
+
+			ws.on('message', (rawMessage) => {
+				try {
+					const msg = JSON.parse(rawMessage);
+
+					switch(msg.command) {
+						case CMD_SEARCH:
+								const messages = msg.providers
+									.map(x => providers[x])
+									.reduce((a, b) => [...a, ...b.handleQuery('')], []);
+
+								nuance.processMessages(messages, (result) => {
+									// send result to ws
+								});
+							break;
+					}
+				}
+				catch (error) {
+					console.log(error)
+				}
+			});
+		});
 	});
 
-RedditProvider.provide('k06yRu5qViNBmelHGLTgHruPczw')
-	.then((redditClient) => {
 
-	});
 
