@@ -26,7 +26,10 @@ const CMD_SEARCH = 'search';
 Promise.all([
 	TwitterProvider.provide('9fwnAGzG8KUYrSjZStsvNnLTS', 'KkvpF6btanqadmskdLJBxtTdPMWRyB0c2LFmSJLWSHBl1zK2Tn'),
 	RedditProvider.provide('k06yRu5qViNBmelHGLTgHruPczw')
-]).then((providers) => providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {}))
+])
+	.then((providers) => {
+		return providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {})
+	})
 	.then((providers) => {
 		const wss = new WebSocket.Server({port: 8080});
 
@@ -36,15 +39,15 @@ Promise.all([
 				try {
 					const msg = JSON.parse(rawMessage);
 
-					switch(msg.command) {
+					switch (msg.command) {
 						case CMD_SEARCH:
-								const messages = msg.providers
-									.map(x => providers[x])
-									.reduce((a, b) => [...a, ...b.handleQuery('')], []);
+							const messages = msg.providers
+								.map(x => providers[x])
+								.reduce((a, b) => [...a, ...b.handleQuery('')], []);
 
-								nuance.processMessages(messages, (result) => {
-									// send result to ws
-								});
+							nuance.processMessages(messages, (result) => {
+								// send result to ws
+							});
 							break;
 					}
 				}
@@ -53,7 +56,7 @@ Promise.all([
 				}
 			});
 		});
-	});
-
+	})
+	.catch(console.log);
 
 
