@@ -1,6 +1,5 @@
 const rp = require('request-promise-native');
 const Twitter = require('twitter');
-const Sanitize = require('./sanitize');
 const tweetsPerCall = 100;
 
 module.exports = {

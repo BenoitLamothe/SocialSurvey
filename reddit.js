@@ -1,11 +1,31 @@
 const snoowrap = require('snoowrap');
+const rp = require('request-promise-native');
+
 
 module.exports = {
-	provide(token) {
-		return new Promise((resolve) => resolve(new RedditClient(new snoowrap({
-			userAgent: 'social-survey',
-			accessToken: token
-		}))))
+	provide(key, secret) {
+
+		return new Promise((resolve, reject) => {
+			const options = {
+				method: 'POST',
+				uri: 'https://www.reddit.com/api/v1/access_token',
+				headers: {
+					'Authorization': `Basic ${new Buffer(key + ':' + secret).toString('base64')}`,
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				body: 'grant_type=client_credentials'
+			};
+
+			rp(options)
+				.then((body) => {
+					const resp = JSON.parse(body);
+					resolve(new RedditClient(new snoowrap({
+						userAgent: 'social-survey',
+						accessToken: resp.access_token
+					})));
+				})
+				.catch(reject);
+		})
 	}
 };
 
