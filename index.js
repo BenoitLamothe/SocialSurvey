@@ -41,7 +41,7 @@ Promise.all([
 
 					switch (msg.command) {
 						case CMD_SEARCH:
-							Promise.all(PROVIDERS.map(x => providers[x].handleQuery(msg.args.query)))
+							Promise.all(msg.providers.map(x => providers[x].handleQuery(msg.args.query)))
 								.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
 								.then(messages => messages.map(x => Object.assign(x, { sanitized_text: Sanitizer.sanitizeText(x.raw_text) })))
 								.then((messages) => {
