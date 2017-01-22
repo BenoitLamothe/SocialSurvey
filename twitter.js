@@ -1,5 +1,6 @@
 const rp = require('request-promise-native');
 const Twitter = require('twitter');
+const Sanitize = require('./sanitize');
 const tweetsPerCall = 100;
 
 module.exports = {
@@ -45,7 +46,7 @@ class TwitterClient {
                         if(tweets.search_metadata.count <= 0) {
                             fullfil(collectedTweets);
                         } else {
-                            const currentTweets = tweets.statuses.map(t => ({ text: t.text }));
+                            const currentTweets = tweets.statuses.map(t => t.text);
                             const toCompletionTweetCount = query.max - collectedTweets.length;
                             if(toCompletionTweetCount <= tweetsPerCall) {
                                 currentTweets.splice(toCompletionTweetCount, tweetsPerCall - toCompletionTweetCount);
