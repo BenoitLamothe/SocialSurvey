@@ -22,21 +22,29 @@ class Nuance {
 
 	processMessages(messages, onComplete) {
 		return new Promise((resolve) => {
-			const process = function(ma){
-				console.log(ma.length);
-				if(ma.length === 0) {
+			const process = function (ma) {
+				if (ma.length === 0) {
 					resolve({})
 				} else {
-					const message = ma.pop().sanitized_text;
-					console.log(message);
-					this._getNLU(message).then((result) => {
-						onComplete(result);
+					const message = ma.pop();
+					this._getNLU(message.sanitized_text).then((response) => {
+						if (
+							response.QueryResult &&
+							response.QueryResult.result_type === 'NinaDoNLU_NLE' &&
+							response.QueryResult.final_response === true
+						) {
+							const result = {
+								provider: message.provider,
+								sentiment: response.QueryResult.results.map(x => ({confidence: x.confidence, sentiment: x.intent, raw_text: x.raw_text}))
+							};
+							onComplete(result);
+						}
 						process()
 					})
 				}
 			}.bind(this, messages);
 
-			for(var i = 0; i < numAsync; i++) {
+			for (let i = 0; i < numAsync; i++) {
 				process();
 			}
 		});

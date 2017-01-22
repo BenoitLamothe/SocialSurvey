@@ -32,15 +32,7 @@ Promise.all([
 		return providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {})
 	})
 	.then((providers) => {
-		Promise.all(PROVIDERS.map(x => providers[x].handleQuery({text: 'donald trump', time: 'month', until: '2017-01-21', max: 10, type: 'mixed'})))
-			.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
-			.then(messages => messages.map(x => Object.assign(x, { sanitized_text: Sanitizer.sanitizeText(x.raw_text) })))
-			.then((messages) => {
-				nuance.processMessages(messages, (result) => {
-					console.log(result);
-				});
-			});
-		/*const wss = new WebSocket.Server({port: 8080});
+		const wss = new WebSocket.Server({port: 8080});
 
 		wss.on('connection', (ws) => {
 			ws.on('message', (rawMessage) => {
@@ -49,12 +41,12 @@ Promise.all([
 
 					switch (msg.command) {
 						case CMD_SEARCH:
-							Promise.all(msg.providers.map(x => providers[x].handleQuery(msg.args.query)))
+							Promise.all(PROVIDERS.map(x => providers[x].handleQuery(msg.args.query)))
 								.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
-								.then(messages => messages.map(Sanitizer.sanitizeText))
+								.then(messages => messages.map(x => Object.assign(x, { sanitized_text: Sanitizer.sanitizeText(x.raw_text) })))
 								.then((messages) => {
 									nuance.processMessages(messages, (result) => {
-										console.log(result);
+										ws.send(JSON.stringify(result))
 									});
 								});
 							break;
@@ -65,6 +57,6 @@ Promise.all([
 					//TODO(Olivier): send back error message
 				}
 			});
-		});*/
+		});
 	})
 	.catch(console.log);
