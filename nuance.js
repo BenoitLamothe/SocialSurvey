@@ -1,4 +1,3 @@
-const Throttle = require('promise-throttle');
 const rp = require('request-promise-native');
 const numAsync = 3;
 
