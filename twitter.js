@@ -42,6 +42,7 @@ class TwitterClient {
                     fullfil(collectedTweets);
                 } else {
                     this._client.get('search/tweets', params, function (error, tweets, response) {
+                        //console.log(tweets);
                         if(tweets.search_metadata.count <= 0) {
                             fullfil(collectedTweets);
                         } else {
