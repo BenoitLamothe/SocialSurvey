@@ -3,6 +3,7 @@ const WebSocket = require('ws');
 const Nuance = require('./nuance');
 const TwitterProvider = require('./twitter');
 const RedditProvider = require('./reddit');
+const Sanitizer = require('./sanitize');
 
 const nuance = new Nuance({
 	nmaid: 'Nuance_ConUHack2017_20170119_210049',
@@ -42,6 +43,7 @@ Promise.all([
 						case CMD_SEARCH:
 							Promise.all(msg.providers.map(x => providers[x].handleQuery(msg.args.query)))
 								.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
+								.then(messages => messages.map(Sanitizer.sanitizeText))
 								.then((messages) => {
 									nuance.processMessages(messages, (result) => {
 										console.log(result);
@@ -58,17 +60,3 @@ Promise.all([
 		});
 	})
 	.catch(console.log);
-
-
-// {
-// 		command: 'search',
-// 		providers: ['twitter', 'reddit'],
-// 		args: {
-// 			query: {
-// 				text: '',
-// 				type: '',
-// 				time: '',
-//        max: 500,
-// 			}
-// 		}
-// }
