@@ -40,7 +40,9 @@ class Nuance {
 									.map(x => ({confidence: x.confidence, sentiment: x.intent}))
 									.sort((a, b) => b.confidence - a.confidence)
 							};
-							onComplete(result);
+							if (result.sentiment[0].confidence > 30) {
+								onComplete(result);
+							}
 						}
 						process()
 					})
