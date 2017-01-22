@@ -68,6 +68,7 @@ class TwitterClient {
             };
 
             if(query.until != undefined) { params.until = query.until; }
+            //if(query.type =)
             _asyncSearchTwitter(params, [], -1);
         });
     }
