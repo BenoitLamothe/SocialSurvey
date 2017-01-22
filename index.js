@@ -26,7 +26,11 @@ const CMD_SEARCH = 'search';
 
 Promise.all([
 	TwitterProvider.provide('9fwnAGzG8KUYrSjZStsvNnLTS', 'KkvpF6btanqadmskdLJBxtTdPMWRyB0c2LFmSJLWSHBl1zK2Tn'),
+<<<<<<< HEAD
 	RedditProvider.provide('qkBIykgxplZaXAtTimGc8-pV9ys')
+=======
+	RedditProvider.provide('IIxhEgynw_gtUg', 'Z3CDzVjwnn8rmqaUkavVXGY2u4A')
+>>>>>>> edfe9a57cf47d45d1613d3779c392a9106313a11
 ])
 	.then((providers) => {
 		return providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {})
