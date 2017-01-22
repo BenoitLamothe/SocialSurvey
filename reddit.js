@@ -23,7 +23,7 @@ class RedditClient {
 				.then(submissions => submissions.filter(x => x.comments.length > 0))
 				.then(submissions => submissions.map(x => x.comments))
 				.then(comments => comments.reduce((a, b) => [...a, ...b], []))
-				.then(comments => comments.map(x => ({ raw_text: x.body })))
+				.then(comments => comments.map(x => ({ raw_text: x.body, provider: 'reddit' })))
 				.catch(() => []);
 	}
 }
