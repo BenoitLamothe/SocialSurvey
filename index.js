@@ -25,7 +25,7 @@ const CMD_SEARCH = 'search';
 
 Promise.all([
 	TwitterProvider.provide('9fwnAGzG8KUYrSjZStsvNnLTS', 'KkvpF6btanqadmskdLJBxtTdPMWRyB0c2LFmSJLWSHBl1zK2Tn'),
-	RedditProvider.provide('k06yRu5qViNBmelHGLTgHruPczw')
+	RedditProvider.provide('UxhX2mzELBahj4Ug1AeJ_nAhKFw')
 ])
 	.then((providers) => {
 		return providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {})
@@ -34,25 +34,25 @@ Promise.all([
 		const wss = new WebSocket.Server({port: 8080});
 
 		wss.on('connection', (ws) => {
-
 			ws.on('message', (rawMessage) => {
 				try {
 					const msg = JSON.parse(rawMessage);
 
 					switch (msg.command) {
 						case CMD_SEARCH:
-							const messages = msg.providers
-								.map(x => providers[x])
-								.reduce((a, b) => [...a, ...b.handleQuery('')], []);
-
-							nuance.processMessages(messages, (result) => {
-								// send result to ws
-							});
+							Promise.all(msg.providers.map(x => providers[x].handleQuery(msg.args.query)))
+								.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
+								.then((messages) => {
+									nuance.processMessages(messages, (result) => {
+										console.log(result);
+									});
+								});
 							break;
 					}
 				}
 				catch (error) {
-					console.log(error)
+					console.log(error);
+					//TODO(Olivier): send back error message
 				}
 			});
 		});
@@ -60,3 +60,15 @@ Promise.all([
 	.catch(console.log);
 
 
+// {
+// 		command: 'search',
+// 		providers: ['twitter', 'reddit'],
+// 		args: {
+// 			query: {
+// 				text: '',
+// 				type: '',
+// 				time: '',
+//        max: 500,
+// 			}
+// 		}
+// }
