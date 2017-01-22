@@ -20,9 +20,17 @@ module.exports = {
                     var currentLocations = remLocations.slice(0, 100);
                     remLocations.splice(0, 100);
                     geoCoder.batchGeocode(currentLocations, (err, res) => {
-                        var isoCollectedCountries = res.map((
-                            c => c.error != undefined ? undefined : Countries.alpha2ToNumeric(c.value[0].countryCode)
-                        ));
+                        var isoCollectedCountries;
+                        if(err != undefined) {
+                            isoCollectedCountries = currentLocations.map((
+                                c => undefined
+                            ));
+                        } else {
+                            isoCollectedCountries = res.map((
+                                c => c.error != undefined ? undefined : Countries.alpha2ToNumeric(c.value[0].countryCode)
+                            ));
+                        }
+
                         collectedCountries.push(...isoCollectedCountries);
                         asyncBatchProcess(remLocations, collectedCountries);
                     });

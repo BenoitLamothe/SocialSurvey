@@ -76,6 +76,13 @@ class TwitterClient {
                     });
 				} else {
 					this._client.get('search/tweets', params, (error, tweets) => {
+					    if(error != undefined) {
+					        params.type = 'mixed';
+                            asyncSearchTwitter(maxId);
+                            console.log(error);
+                            return;
+                        }
+
 						if (tweets.search_metadata.count <= 0) {
                             MapQuest.batchProcessGeocode(collectedTweets.map(tt => tt.guess_location)).then(guessedLocations => {
                                 resolve(collectedTweets.map((x, i) => Object.assign(x, {location: guessedLocations[i]})));

@@ -11,7 +11,7 @@ const nuance = new Nuance({
 }, {
 	appName: 'SocialSurvey',
 	companyName: 'ConUHacks',
-	cloudModelVersion: '1.0.1',
+	cloudModelVersion: '1.0.0',
 	clientAppVersion: '0.0',
 });
 
