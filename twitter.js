@@ -46,7 +46,7 @@ class TwitterClient {
                         if(tweets.search_metadata.count <= 0) {
                             fullfil(collectedTweets);
                         } else {
-                            const currentTweets = tweets.statuses.map(t => ({ raw_text: t.text }));
+                            const currentTweets = tweets.statuses.map(t => ({ raw_text: t.text, provider: 'TWITTER' }));
                             const toCompletionTweetCount = query.max - collectedTweets.length;
                             if(toCompletionTweetCount <= tweetsPerCall) {
                                 currentTweets.splice(toCompletionTweetCount, tweetsPerCall - toCompletionTweetCount);
