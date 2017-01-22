@@ -3,6 +3,7 @@ const WebSocket = require('ws');
 const Nuance = require('./nuance');
 const TwitterProvider = require('./twitter');
 const RedditProvider = require('./reddit');
+const Sanitizer = require('./sanitize');
 
 const nuance = new Nuance({
 	nmaid: 'Nuance_ConUHack2017_20170119_210049',
@@ -25,7 +26,7 @@ const CMD_SEARCH = 'search';
 
 Promise.all([
 	TwitterProvider.provide('9fwnAGzG8KUYrSjZStsvNnLTS', 'KkvpF6btanqadmskdLJBxtTdPMWRyB0c2LFmSJLWSHBl1zK2Tn'),
-	RedditProvider.provide('k06yRu5qViNBmelHGLTgHruPczw')
+	RedditProvider.provide('UxhX2mzELBahj4Ug1AeJ_nAhKFw')
 ])
 	.then((providers) => {
 		return providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {})
@@ -33,39 +34,29 @@ Promise.all([
 	.then((providers) => {
 		const wss = new WebSocket.Server({port: 8080});
 
-		/*wss.on('connection', (ws) => {
-
+		wss.on('connection', (ws) => {
 			ws.on('message', (rawMessage) => {
 				try {
 					const msg = JSON.parse(rawMessage);
 
 					switch (msg.command) {
 						case CMD_SEARCH:
-							const messages = msg.providers
-								.map(x => providers[x])
-								.reduce((a, b) => [...a, ...b.handleQuery('')], []);
-
-							nuance.processMessages(messages, (result) => {
-								// send result to ws
-							});
+							Promise.all(msg.providers.map(x => providers[x].handleQuery(msg.args.query)))
+								.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
+								.then(messages => messages.map(Sanitizer.sanitizeText))
+								.then((messages) => {
+									nuance.processMessages(messages, (result) => {
+										console.log(result);
+									});
+								});
 							break;
 					}
 				}
 				catch (error) {
-					console.log(error)
+					console.log(error);
+					//TODO(Olivier): send back error message
 				}
 			});
-		});*/
-
-		providers[TWITTER_PROVIDER].handleQuery({
-			text: "donald trump",
-			type: "mixed",
-			until: '2017-01-21',
-			max: 100
-		}).then(function (tweets) {
-			console.log(tweets);
-        }).catch(console.log);
+		});
 	})
 	.catch(console.log);
-
-
