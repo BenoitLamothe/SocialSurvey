@@ -11,7 +11,7 @@ const nuance = new Nuance({
 }, {
 	appName: 'SocialSurvey',
 	companyName: 'ConUHacks',
-	cloudModelVersion: '1.0.0',
+	cloudModelVersion: '1.0.1',
 	clientAppVersion: '0.0',
 });
 
@@ -26,13 +26,21 @@ const CMD_SEARCH = 'search';
 
 Promise.all([
 	TwitterProvider.provide('9fwnAGzG8KUYrSjZStsvNnLTS', 'KkvpF6btanqadmskdLJBxtTdPMWRyB0c2LFmSJLWSHBl1zK2Tn'),
-	RedditProvider.provide('UxhX2mzELBahj4Ug1AeJ_nAhKFw')
+	RedditProvider.provide('K8cH9S20DGPnBZG6QPwQg67eI4A')
 ])
 	.then((providers) => {
 		return providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {})
 	})
 	.then((providers) => {
-		const wss = new WebSocket.Server({port: 8080});
+		Promise.all(PROVIDERS.map(x => providers[x].handleQuery({text: 'donald trump', time: 'month', until: '2017-01-21', max:100, type: 'mixed'})))
+			.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
+			.then(messages => messages.map(Sanitizer.sanitizeText))
+			.then((messages) => {
+				nuance.processMessages(messages, (result) => {
+					console.log(result);
+				});
+			});
+		/*const wss = new WebSocket.Server({port: 8080});
 
 		wss.on('connection', (ws) => {
 			ws.on('message', (rawMessage) => {
@@ -57,6 +65,6 @@ Promise.all([
 					//TODO(Olivier): send back error message
 				}
 			});
-		});
+		});*/
 	})
 	.catch(console.log);
