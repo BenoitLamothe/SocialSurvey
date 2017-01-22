@@ -32,9 +32,9 @@ Promise.all([
 		return providers.reduce((a, b, i) => Object.assign({}, a, {[PROVIDERS[i]]: b}), {})
 	})
 	.then((providers) => {
-		Promise.all(PROVIDERS.map(x => providers[x].handleQuery({text: 'donald trump', time: 'month', until: '2017-01-21', max:100, type: 'mixed'})))
+		Promise.all(PROVIDERS.map(x => providers[x].handleQuery({text: 'donald trump', time: 'month', until: '2017-01-21', max: 10, type: 'mixed'})))
 			.then(msgArray => msgArray.reduce((a, b) => [...a, ...b], []))
-			.then(messages => messages.map(Sanitizer.sanitizeText))
+			.then(messages => messages.map(x => Object.assign(x, { sanitized_text: Sanitizer.sanitizeText(x.raw_text) })))
 			.then((messages) => {
 				nuance.processMessages(messages, (result) => {
 					console.log(result);
