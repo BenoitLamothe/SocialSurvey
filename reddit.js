@@ -22,7 +22,11 @@ module.exports = {
 					resolve(new RedditClient(new snoowrap({
 						userAgent: 'social-survey',
 						accessToken: resp.access_token,
+<<<<<<< HEAD
+						retryErrorCodes: []
+=======
 						retryErrorCodes: [],
+>>>>>>> 6f9c26f9acf011ae8856f441e8a4c8ea45007e73
 					})));
 				})
 				.catch(reject);
