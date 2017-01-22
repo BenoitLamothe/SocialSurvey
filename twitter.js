@@ -36,40 +36,43 @@ class TwitterClient {
 	}
 
 	handleQuery(query) {
-        return new Promise((fullfil, reject) => {
-            const _asyncSearchTwitter = (params, collectedTweets, maxId) => {
-                if(collectedTweets.length >= query.max) { // base case
-                    fullfil(collectedTweets);
-                } else {
-                    this._client.get('search/tweets', params, function (error, tweets, response) {
-                        //console.log(tweets);
-                        if(tweets.search_metadata.count <= 0) {
-                            fullfil(collectedTweets);
-                        } else {
-                            const currentTweets = tweets.statuses.map(t => ({ raw_text: t.text, provider: 'TWITTER' }));
-                            const toCompletionTweetCount = query.max - collectedTweets.length;
-                            if(toCompletionTweetCount <= tweetsPerCall) {
-                                currentTweets.splice(toCompletionTweetCount, tweetsPerCall - toCompletionTweetCount);
-                            }
+		return new Promise((resolve) => {
+			const params = {
+				q: query.text,
+				lang: 'en',
+				result_type: query.type,
+				count: tweetsPerCall
+			};
 
-                            collectedTweets.push(...currentTweets);
-                            if(maxId > -1) { params.max_id = maxId; }
-                            _asyncSearchTwitter(params, collectedTweets, tweets.search_metadata.max_id)
-                        }
-                    });
-                }
-            };
+			if (query.until != undefined) {
+				params.until = query.until;
+			}
 
-            var params = {
-                q: query.text,
-                lang: 'en',
-                result_type: query.type,
-                count: tweetsPerCall
-            };
+			const asyncSearchTwitter = function (params, collectedTweets, maxId) {
+				if (collectedTweets.length >= query.max) { // base case
+					resolve(collectedTweets);
+				} else {
+					this._client.get('search/tweets', params, (error, tweets) => {
+						if (tweets.search_metadata.count <= 0) {
+							resolve(collectedTweets);
+						} else {
+							const currentTweets = tweets.statuses.map(t => ({raw_text: t.text, provider: 'TWITTER'}));
+							const toCompletionTweetCount = query.max - collectedTweets.length;
+							if (toCompletionTweetCount <= tweetsPerCall) {
+								currentTweets.splice(toCompletionTweetCount, tweetsPerCall - toCompletionTweetCount);
+							}
 
-            if(query.until != undefined) { params.until = query.until; }
-            //if(query.type =)
-            _asyncSearchTwitter(params, [], -1);
-        });
-    }
+							collectedTweets.push(...currentTweets);
+							if (maxId > -1) {
+								params.max_id = maxId;
+							}
+							asyncSearchTwitter(tweets.search_metadata.max_id)
+						}
+					});
+				}
+			}.bind(this, params, []);
+
+			asyncSearchTwitter(-1);
+		});
+	}
 }
