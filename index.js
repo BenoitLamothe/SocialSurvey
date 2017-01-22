@@ -33,7 +33,7 @@ Promise.all([
 	.then((providers) => {
 		const wss = new WebSocket.Server({port: 8080});
 
-		wss.on('connection', (ws) => {
+		/*wss.on('connection', (ws) => {
 
 			ws.on('message', (rawMessage) => {
 				try {
@@ -55,7 +55,16 @@ Promise.all([
 					console.log(error)
 				}
 			});
-		});
+		});*/
+
+		providers[TWITTER_PROVIDER].handleQuery({
+			text: "donald trump",
+			type: "mixed",
+			until: '2017-01-21',
+			max: 100
+		}).then(function (tweets) {
+			console.log(tweets);
+        }).catch(console.log);
 	})
 	.catch(console.log);
 
