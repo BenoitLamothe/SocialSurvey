@@ -34,7 +34,7 @@ class Nuance {
 						) {
 							const result = {
 								provider: message.provider,
-								sentiment: response.QueryResult.results.map(x => ({confidence: x.confidence, sentiment: x.intent, raw_text: x.raw_text}))
+								sentiment: response.QueryResult.results.map(x => ({confidence: x.confidence, sentiment: x.intent, raw_text: message.raw_text}))
 							};
 							onComplete(result);
 						}
