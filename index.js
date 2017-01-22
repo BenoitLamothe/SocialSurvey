@@ -46,6 +46,7 @@ Promise.all([
 								.then(messages => messages.map(x => Object.assign(x, { sanitized_text: Sanitizer.sanitizeText(x.raw_text) })))
 								.then((messages) => {
 									nuance.processMessages(messages, (result) => {
+										console.log(result);
 										ws.send(JSON.stringify(result))
 									});
 								});

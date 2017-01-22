@@ -35,6 +35,7 @@ class Nuance {
 							const result = {
 								provider: message.provider,
 								raw_text: message.raw_text,
+								location: message.location,
 								sentiment: response.QueryResult.results
 									.map(x => ({confidence: x.confidence, sentiment: x.intent}))
 									.sort((a, b) => b.confidence - a.confidence)

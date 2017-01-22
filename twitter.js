@@ -1,5 +1,6 @@
 const rp = require('request-promise-native');
 const Twitter = require('twitter');
+const MapQuest = require('./mapquest');
 const tweetsPerCall = 100;
 
 module.exports = {
@@ -35,6 +36,26 @@ class TwitterClient {
 		this._client = client;
 	}
 
+    determinePosition(tweet) {
+        if(tweet.geo != undefined) {
+            console.log("Geo tag found = " + tweet.geo);
+        } else if(tweet.user.location != undefined) {
+            console.log("User geo loc = " + tweet.user.location);
+        } else if(tweet.user.time_zone) {
+            console.log("User time zone = " + tweet.user.time_zone);
+        }
+    }
+
+    guessBestLocation(tweet) {
+        if(tweet.geo != undefined) {
+            return tweet.geo;
+        } else if(tweet.user.location != undefined && tweet.user.location.length > 0) {
+            return tweet.user.location;
+        } else if(tweet.user.time_zone != undefined) {
+            return tweet.user.time_zone;
+        }
+    }
+
 	handleQuery(query) {
 		return new Promise((resolve) => {
 			const params = {
@@ -50,13 +71,22 @@ class TwitterClient {
 
 			const asyncSearchTwitter = function (params, collectedTweets, maxId) {
 				if (collectedTweets.length >= query.max) { // base case
-					resolve(collectedTweets);
+                    MapQuest.batchProcessGeocode(collectedTweets.map(tt => tt.guess_location)).then(guessedLocations => {
+                        resolve(collectedTweets.map((x, i) => Object.assign(x, {location: guessedLocations[i]})));
+                    });
 				} else {
 					this._client.get('search/tweets', params, (error, tweets) => {
 						if (tweets.search_metadata.count <= 0) {
-							resolve(collectedTweets);
+                            MapQuest.batchProcessGeocode(collectedTweets.map(tt => tt.guess_location)).then(guessedLocations => {
+                                resolve(collectedTweets.map((x, i) => Object.assign(x, {location: guessedLocations[i]})));
+                            });
 						} else {
-							const currentTweets = tweets.statuses.map(t => ({raw_text: t.text, provider: 'TWITTER'}));
+							const currentTweets = tweets.statuses.map(t => ({
+							    raw_text: t.text,
+                                provider: 'twitter',
+                                guess_location: this.guessBestLocation(t)
+							}));
+
 							const toCompletionTweetCount = query.max - collectedTweets.length;
 							if (toCompletionTweetCount <= tweetsPerCall) {
 								currentTweets.splice(toCompletionTweetCount, tweetsPerCall - toCompletionTweetCount);
