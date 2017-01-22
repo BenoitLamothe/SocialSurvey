@@ -21,7 +21,8 @@ module.exports = {
 					const resp = JSON.parse(body);
 					resolve(new RedditClient(new snoowrap({
 						userAgent: 'social-survey',
-						accessToken: resp.access_token
+						accessToken: resp.access_token,
+						retryErrorCodes: []
 					})));
 				})
 				.catch(reject);
